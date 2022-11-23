@@ -5,6 +5,7 @@ from rest_framework import permissions
 from .models import Project
 from .serializers import ProjectSerializer
 from rest_framework.permissions import IsAuthenticated
+from projects.permissions import ProjectPermission
 
 
 
@@ -16,7 +17,7 @@ class MultipleSerializerMixin:
     def get_serializer_class(self):
     # Si l'action demandée est retrieve nous retournons le serializer de détail
         #if self.action == 'retrieve':
-        if self.action == 'retrieve' and self.detail_serializer_class is not None:    
+        if self.action == 'GET' and self.detail_serializer_class is not None:    
             return self.detail_serializer_class
         return super().get_serializer_class()
 
@@ -24,7 +25,7 @@ class MultipleSerializerMixin:
 #@permission_classes([IsAuthenticated, ProjectPermission])
 class ProjectListApiView(MultipleSerializerMixin, ReadOnlyModelViewSet):
    
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, ProjectPermission]
 
     # 1. List all
     def get(self, request, *args, **kwargs):

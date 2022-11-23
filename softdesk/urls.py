@@ -27,6 +27,7 @@ projects_router.register('projects', ProjectListApiView, basename='projects')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('accounts/signup', SignupView.as_view(), name='register'),
     path('accounts/login', TokenObtainPairView.as_view(), name='register'),
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
