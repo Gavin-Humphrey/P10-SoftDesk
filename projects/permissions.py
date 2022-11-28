@@ -25,3 +25,5 @@ class ContributorPermissions(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return project in Project.objects.filter(contributors__user=request.user)
         return request.user == project.author
+
+

@@ -1,14 +1,14 @@
-from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
-
+from django.urls import path, include
 from . import views
 
 
-
 urlpatterns = [
-    path('', views.project_list),
-    path('<int:pk>/', views.project_detail),
-]
+    
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+    path('project-list/', views.projectList, name='project-list'),
+    path('project-detail/<str:pk>', views.projectDetail, name='project-detail'),
+    path('project-create/', views.projectCreate, name='project-create'),
+    path('project-updates/<str:pk>', views.projectUpdate, name='project-updates'),
+    path('project-delete/<str:pk>', views.projectDelete, name='project-delete'),
+]
 
