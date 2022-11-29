@@ -42,7 +42,7 @@ class Project(models.Model):
     author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author')
 
     def __str__(self):
-        return self.title
+        return self.title 
 
 
 class Contributor(models.Model):

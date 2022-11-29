@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 
 
 
-class ProjectPermission(permissions.BasePermission):
+class ProjectPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
             project = get_object_or_404(Project, id=view.kwargs['pk'])
