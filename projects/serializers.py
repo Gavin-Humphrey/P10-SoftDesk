@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from projects.models import Project, Contributor
+from projects.models import Issue, Project, Contributor
 
 
 
@@ -11,10 +11,17 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only__fields = ('author', 'id')
 
 
-
 class ContributorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contributor
         fields = '__all__'
         read_only__fields = ('project', 'role', 'id')
+
+
+class IssueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Issue
+        fields = '__all__'
+        read_only__fields = ('project', 'author', 'created_time', 'id')

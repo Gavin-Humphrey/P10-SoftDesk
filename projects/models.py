@@ -52,3 +52,18 @@ class Contributor(models.Model):
 
     def __str__(self):
         return self.user
+
+
+class Issue(models.Model):
+    title = models.CharField(max_length=128)
+    desc = models.TextField(max_length=2048)
+    tag = models.CharField(choices=Choice.TAGS, max_length=7)
+    priority = models.CharField(choices=Choice.PRIORITIES, max_length=6, default='LOW')
+    status = models.CharField(choices=Choice.STATUSES, max_length=11, default='TODO')
+    project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
+    author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    assignee = models.ForeignKey(to=Contributor, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

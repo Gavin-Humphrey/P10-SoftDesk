@@ -9,7 +9,12 @@ urlpatterns = [
     path('project-updates/<str:pk>', views.projectUpdate, name='project-updates'),
     path('project-delete/<str:pk>', views.projectDelete, name='project-delete'),
 
-    path('project/<int:project_pk>/users/', views.contributor_list),
-    path('project/<int:project_pk>/users/<int:contributor_pk>/', views.contributor_detail),
+    # Contributor
+    path('project/<int:project_pk>/users/', views.contributorList),
+    path('project/<int:project_pk>/users/<int:contributor_pk>/', views.contributorDetail),
+
+    # Issue
+    path('project/<int:project_pk>/issues/', views.issueList),
+    path('project/<int:project_pk>/create-issues/', views.createIssue),
 ]   
 
