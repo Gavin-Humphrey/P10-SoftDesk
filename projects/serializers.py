@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from projects.models import Issue, Project, Contributor
+from projects.models import Project, Contributor, Issue, Comments
 
 
 
@@ -25,3 +25,11 @@ class IssueSerializer(serializers.ModelSerializer):
         model = Issue
         fields = '__all__'
         read_only__fields = ('project', 'author', 'created_time', 'id')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comments
+        fields = '__all__'
+        read_only__fields = ('desc', 'author', 'created_time', 'id')

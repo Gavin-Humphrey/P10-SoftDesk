@@ -51,7 +51,7 @@ class Contributor(models.Model):
     role = models.CharField(max_length=11, choices=Choice.ROLES, default='CONTRIBUTOR')
 
     def __str__(self):
-        return self.user
+        return f"{self.user} {self.project} {self.role}"
 
 
 class Issue(models.Model):
@@ -62,8 +62,18 @@ class Issue(models.Model):
     status = models.CharField(choices=Choice.STATUSES, max_length=11, default='TODO')
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
     author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(to=Contributor, on_delete=models.CASCADE)
+    assignee = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assigned_to", null=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+
+class Comments(models.Model):
+    desc = models.TextField(max_length=2048)
+    author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    issue = models.ForeignKey(to=Issue, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.author} {self.issue}"

@@ -13,13 +13,13 @@ class Project(admin.ModelAdmin):
 @admin.register(Contributor)
 class Contributor(admin.ModelAdmin):
 
-    list_display = ['user', 'project', 'role'] 
+    list_display = ['id', 'user', 'project', 'role'] 
 
 
 @admin.register(Issue)
 class Issue(admin.ModelAdmin):
 
-    list_display = ['title', 'desc', 'tag', 'priority', 'status', 'project', 'author', 'assignee', 'created_time' ] 
+    list_display = ['title', 'desc', 'tag', 'priority', 'status', 'project', 'author',  'assignee', 'created_time' ] 
 
 
 
