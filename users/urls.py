@@ -6,10 +6,9 @@ from . import views
 
 
 urlpatterns = [
-    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 router = DefaultRouter()
-router.register('user/signup', views.SignupView, basename="signup") # r"user"
+router.register('signup', views.SignupView, basename="signup") # r"user"
 urlpatterns += router.urls
-

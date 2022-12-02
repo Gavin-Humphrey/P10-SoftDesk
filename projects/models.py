@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.conf import settings
 
@@ -69,7 +68,7 @@ class Issue(models.Model):
         return self.title
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     desc = models.TextField(max_length=2048)
     author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     issue = models.ForeignKey(to=Issue, on_delete=models.CASCADE)

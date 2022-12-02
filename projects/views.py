@@ -1,5 +1,3 @@
-from xml.etree.ElementTree import Comment
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -12,11 +10,14 @@ from .serializers import (
     IssueSerializer, 
     CommentSerializer
     )
-from .models import Issue, Project, Contributor, Comments
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import Issue, Project, Contributor, Comment
+from rest_framework.permissions import IsAuthenticated
 from .permissions import (
     ProjectPermissions,
-    ContributorPermissions
+    ContributorPermissions,
+    IssuePermissions,
+    CommentPermissions
+
     )
 
 
@@ -58,6 +59,7 @@ def projectUpdate(request, project_pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated, ProjectPermissions])
 def projectDelete(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
     project.delete()
@@ -65,6 +67,7 @@ def projectDelete(request, project_pk):
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated, ProjectPermissions])
 def contributorList(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
 
@@ -94,7 +97,7 @@ def contributorList(request, project_pk):
 
 
 @api_view(['DELETE'])
-#@permission_classes([IsAuthenticated, ContributorPermissions])
+@permission_classes([IsAuthenticated, ContributorPermissions])
 def contributorDetail(request, project_pk, contributor_pk):
     get_object_or_404(Project, id=project_pk)
     contributor = get_object_or_404(Contributor, id=contributor_pk)
@@ -108,6 +111,7 @@ def contributorDetail(request, project_pk, contributor_pk):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IssuePermissions])
 def issueList(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
     issues = Issue.objects.filter(project=project)#
@@ -116,6 +120,7 @@ def issueList(request, project_pk):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated, IssuePermissions])
 def createIssue(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
     data = request.data.copy()
@@ -129,6 +134,7 @@ def createIssue(request, project_pk):
 
 
 @api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated, IssuePermissions])
 def issueDetail(request, project_pk, issue_pk):
     project = get_object_or_404(Project, id=project_pk)
     issue = get_object_or_404(Issue, id=issue_pk)
@@ -153,11 +159,14 @@ def issueDetail(request, project_pk, issue_pk):
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def commentView(request, project_pk, issue_pk):
+@permission_classes([IsAuthenticated, CommentPermissions])
+def commentView(request, project_pk, issue_pk, comment_pk):
     get_object_or_404(Project, id=project_pk)
-    issue = Issue.objects.filter(Issue, id=issue_pk)#
+    #issue = Issue.objects.filter(Issue, id=issue_pk)#####
+    issue = Issue.objects.get(id=issue_pk)
+    comment = get_object_or_404(Comment, id=comment_pk)
     if request.method == 'GET':
-        comments = Comments.objects.filter(issue=issue)
+        comments = Comment.objects.filter(issue=issue)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -171,7 +180,18 @@ def commentView(request, project_pk, issue_pk):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+    elif request.method == 'PUT':
+        data = request.data.copy()
+        data['issue'] = issue.id
+        data['author'] = comment.author.id
+
+        serializer = CommentSerializer(comment, data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     elif request.method == 'DELETE':
-        issue.delete()
-        return Response('Issue successfully deleted.', status=status.HTTP_204_NO_CONTENT)
+        comment.delete()
+        return Response('Comment, successfully deleted.', status=status.HTTP_204_NO_CONTENT)
