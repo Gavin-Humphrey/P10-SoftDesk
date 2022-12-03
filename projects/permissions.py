@@ -26,7 +26,6 @@ class ContributorPermissions(permissions.BasePermission):
         return request.user == project.author
 
 
-
 class IssuePermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         project = get_object_or_404(Project, id=view.kwargs['project_pk'])
@@ -35,7 +34,6 @@ class IssuePermissions(permissions.BasePermission):
             return request.user == issue.author
         except KeyError:
             return project in Project.objects.filter(contributors__user=request.user)
-
 
 
 class CommentPermissions(permissions.BasePermission):

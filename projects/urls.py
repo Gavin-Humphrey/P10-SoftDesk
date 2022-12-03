@@ -3,9 +3,9 @@ from . import views
 
 
 urlpatterns = [
+    path('', views.projectCreate, name='project-create'),
     path('', views.projectList, name='project-list'),
     path('<str:project_pk>', views.projectDetail, name='project-detail'),
-    path('', views.projectCreate, name='project-create'),
     path('<str:project_pk>', views.projectUpdate, name='project-updates'),
     path('<str:project_pk>', views.projectDelete, name='project-delete'),
 
@@ -19,6 +19,7 @@ urlpatterns = [
     path('<int:project_pk>/issues/<int:issue_pk>/', views.issueDetail),
 
     # comment
-    path('<int:project_pk>/issues/<int:issue_pk>/comments/<int:comment_pk>/', views.commentView),
+    path('<int:project_pk>/issues/<int:issue_pk>/comments/', views.commentList),
+    path('<int:project_pk>/issues/<int:issue_pk>/comments/<int:comment_pk>/', views.commentDetail),
 ]   
 
