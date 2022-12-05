@@ -3,11 +3,8 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.projectCreate, name='project-create'),
-    path('', views.projectList, name='project-list'),
-    path('<str:project_pk>', views.projectDetail, name='project-detail'),
-    path('<str:project_pk>', views.projectUpdate, name='project-updates'),
-    path('<str:project_pk>', views.projectDelete, name='project-delete'),
+    path('', views.projectList),
+    path('<str:project_pk>/', views.projectDetail),
 
     # Contributor
     path('<int:project_pk>/users/', views.contributorList),
@@ -15,7 +12,6 @@ urlpatterns = [
 
     # Issue
     path('<int:project_pk>/issues/', views.issueList),
-    path('<int:project_pk>/create-issues/', views.createIssue),
     path('<int:project_pk>/issues/<int:issue_pk>/', views.issueDetail),
 
     # comment

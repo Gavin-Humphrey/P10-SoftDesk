@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from django.db import IntegrityError
 from .serializers import (
     ProjectSerializer, 
     ContributorSerializer, 
@@ -17,56 +16,57 @@ from .permissions import (
     ContributorPermissions,
     IssuePermissions,
     CommentPermissions
-
     )
 
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated, ProjectPermissions])
 def projectList(request):
-    projects = Project.objects.filter(contributors__user=request.user)
-    serializer = ProjectSerializer(projects, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        #projects = Project.objects.filter(contributors__user=request.user)
+        projects = [
+            contributor.project for contributor in Contributor.objects.filter(user=request.user)
+        ]
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated, ProjectPermissions])
+    elif request.method == 'POST':
+        data = request.data.copy()
+        data['author'] = request.user.id
+        serializer = ProjectSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            project = serializer.save()
+            Contributor.objects.create(user=request.user, project=project, role='AUTHOR')
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+         
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated, ProjectPermissions]) 
 def projectDetail(request, project_pk):
-    projects = get_object_or_404(Project, id=project_pk)
-    serializer = ProjectSerializer(projects, many=False)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated, ProjectPermissions])
-def projectCreate(request):
-    serializer = ProjectSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        project = serializer.save()
-        Contributor.objects.create(user=request.user, project=project, role='AUTHOR')
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated, ProjectPermissions])
-def projectUpdate(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
-    serializer = ProjectSerializer(instance=project, data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'GET':
+        serializer = ProjectSerializer(project, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+    elif request.method == 'PUT':
+        data = request.data.copy()
+        data['author'] = project.author.id
+        serializer = ProjectSerializer(instance=project, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated, ProjectPermissions])
-def projectDelete(request, project_pk):
-    project = get_object_or_404(Project, id=project_pk)
-    project.delete()
-    return Response(project.title + " successfully delete!", status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'DELETE':
+        project = get_object_or_404(Project, id=project_pk)
+        project.delete()
+        return Response(project.title + " successfully delete!", status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated, ProjectPermissions])
+@permission_classes([IsAuthenticated, ContributorPermissions])
 def contributorList(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
 
@@ -109,27 +109,24 @@ def contributorDetail(request, project_pk, contributor_pk):
             return Response('Contributor successfully deleted.', status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated, IssuePermissions])
 def issueList(request, project_pk):
     project = get_object_or_404(Project, id=project_pk)
-    issues = Issue.objects.filter(project=project)#
-    serializer = IssueSerializer(issues, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        issues = Issue.objects.filter(project=project)#
+        serializer = IssueSerializer(issues, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated, IssuePermissions])
-def createIssue(request, project_pk):
-    project = get_object_or_404(Project, id=project_pk)
-    data = request.data.copy()
-    data['project'] = project.id
-    data['author'] = request.user.id
-    serializer = IssueSerializer(data=data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'POST':
+        data = request.data.copy()
+        data['project'] = project.id
+        data['author'] = request.user.id
+        serializer = IssueSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT', 'DELETE'])
@@ -180,7 +177,6 @@ def commentList(request, project_pk, issue_pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated, CommentPermissions])
 def commentDetail(request, project_pk, issue_pk, comment_pk):
@@ -192,17 +188,6 @@ def commentDetail(request, project_pk, issue_pk, comment_pk):
         comments = Comment.objects.filter(issue=issue)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # elif request.method == 'POST':
-    #     data = request.data.copy()
-    #     data['issue'] = issue.id
-    #     data['author'] = request.user.id
-        
-    #     serializer = CommentSerializer(data=data)
-    #     if serializer.is_valid(raise_exception=True):
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'PUT':
         data = request.data.copy()
