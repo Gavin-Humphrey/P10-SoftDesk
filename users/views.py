@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer
 
 
+
 class SignupView(viewsets.ModelViewSet):
 
     """
@@ -14,5 +15,6 @@ class SignupView(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
     queryset = User.objects.all() 
+  
 
 

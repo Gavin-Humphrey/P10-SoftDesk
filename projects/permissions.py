@@ -7,6 +7,7 @@ from rest_framework.generics import get_object_or_404
 
 
 
+
 class ProjectPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
