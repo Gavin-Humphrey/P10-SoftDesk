@@ -55,19 +55,23 @@ class ProjectDetailView(APIView):
 
     def get(self, request, project_pk, *args, **kwargs):
         project = get_object_or_404(Project, id=project_pk)
-        serializer = ProjectSerializer(project, many=False)
+        #serializer = ProjectSerializer(project, many=False)
+        serializer = ProjectSerializer(project)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+  
     def put(self, request, project_pk, *args, **kwargs):
         project = get_object_or_404(Project, id=project_pk)
+
         data = request.data.copy()
         data['author'] = project.author.id
-        serializer = ProjectSerializer(instance=project, data=request.data)
+        #serializer = ProjectSerializer(instance=project, data=request.data)
+        serializer = ProjectSerializer(project, data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
 
     def delete(self, request, project_pk, *args, **kwargs):
             project = get_object_or_404(Project, id=project_pk)
@@ -205,9 +209,8 @@ class CommentDetailView(APIView):
     def get(self, request, project_pk, comment_pk, *args, **kwargs): 
         get_object_or_404(Project, id=project_pk)
         comment = get_object_or_404(Comment, id=comment_pk)
-        if request.method == 'GET':
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, issue_pk, comment_pk, *args, **kwargs):
         issue = get_object_or_404(Issue, id=issue_pk)
